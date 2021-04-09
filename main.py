@@ -1,6 +1,7 @@
+import agent
 import environment
-from environment import Map
+from environment import Maze
 
 if __name__ == '__main__':
-    map = Map(50)
-    environment.show_board(map)
+    maze = Maze(50)
+    print(agent.agent(maze, 2))
