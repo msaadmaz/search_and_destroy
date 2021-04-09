@@ -58,6 +58,11 @@ class Maze:
         self.confidence_matrix = np.full((dim, dim), 1/(dim**2))
         self.traveled_distances = []
 
+    def reset(self):
+        self.belief_matrix = np.full((self.dim, self.dim), 1/(self.dim**2))
+        self.confidence_matrix = np.full((self.dim, self.dim), 1/(self.dim**2))
+        self.traveled_distances = []
+
 
 def show_board(maze):
     """

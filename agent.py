@@ -62,10 +62,7 @@ def false_negative_of_cell(maze, cell):
 
 
 def get_total_distance_traveled(maze):
-    total_distance_traveled = 0
-    for manhattan_distance in maze.traveled_distances:
-        total_distance_traveled += manhattan_distance
-    return total_distance_traveled
+    return sum(maze.traveled_distances)
 
 
 def search_cell(maze, cell):
@@ -92,8 +89,8 @@ def agent(maze, option):
         if search_cell(maze, (x, y)):
             total_distance_traveled = get_total_distance_traveled(maze)
             # set the target as found
-            maze.board[x, y].is_found = True
-            environment.show_board(maze)
+            # maze.board[x, y].is_found = True
+            # environment.show_board(maze)
             return number_of_searches + total_distance_traveled
         else:
             # Calculate P(Target in Cell i | Observations ^ Failure in Cell j)
