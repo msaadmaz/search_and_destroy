@@ -76,6 +76,33 @@ def search_cell(maze, cell):
         return False
 
 
+def fill_distance_matrix(maze, cell):
+    distance_matrix = np.zeros((maze.dim, maze.dim))
+    (x1, y1) = cell
+    for x2 in range(maze.dim):
+        for y2 in range(maze.dim):
+            distance_matrix[x2, y2] = get_manhattan_distance(cell, (x2, y2))
+
+    return distance_matrix
+
+
+def get_agent_3_max_xell(maze, option, previous_cell):
+    distance_matrix = fill_distance_matrix(maze, previous_cell)
+    temp_matrix = maze.confidence_matrix
+
+    result = np.where(temp_matrix == np.amax(temp_matrix))
+    list_of_maxes = list(zip(result[0], result[1]))
+
+    list_of_maxes = get_shortest_max_list(maze, list_of_maxes, previous_cell)
+
+    # make some method to get the average of all the probabilities of the neighbors of each cell in list_of_maxes
+    # make a list of all the same averages
+    # either choose highest average neighbor probability
+    # break those ties by randomness
+
+    return list_of_maxes[random_index]
+
+
 def agent(maze, option):
     number_of_searches = 0
     (x, y) = get_current_max_cell(maze, option, False, (0, 0))
@@ -89,8 +116,8 @@ def agent(maze, option):
         if search_cell(maze, (x, y)):
             total_distance_traveled = get_total_distance_traveled(maze)
             # set the target as found
-            # maze.board[x, y].is_found = True
-            # environment.show_board(maze)
+            maze.board[x, y].is_found = True
+            environment.show_board(maze)
             return number_of_searches + total_distance_traveled
         else:
             # Calculate P(Target in Cell i | Observations ^ Failure in Cell j)
@@ -113,7 +140,15 @@ def agent(maze, option):
                 for i in range(maze.dim):
                     for j in range(maze.dim):
                         maze.confidence_matrix[x, y] = maze.belief_matrix[x, y] * (
-                                    1 - false_negative_of_cell(maze, (x, y)))
+                                1 - false_negative_of_cell(maze, (x, y)))
+
+                # Normalize the confidence matrix as well
+                sum_of_probabilities_confidence = np.sum(maze.confidence_matrix)
+                maze.confidence_matrix = maze.confidence_matrix / sum_of_probabilities_confidence
+
+                if option == 3:
+                    previous_cell = (x, y)
+                    (x, y) = get_agent_3_max_xell(maze, option, previous_cell)
 
         previous_cell = (x, y)
         (x, y) = get_current_max_cell(maze, option, True, previous_cell)
