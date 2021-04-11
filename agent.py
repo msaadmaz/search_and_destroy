@@ -5,12 +5,25 @@ import environment
 
 
 def get_manhattan_distance(cell1, cell2):
+    """
+    Obtains the manhattan distance from cell1 to cell2
+    :param cell1: initial cell
+    :param cell2: destination cell
+    :return: manhattan distance from cell 1 to cell 2
+    """
     (x1, y1) = cell1
     (x2, y2) = cell2
     return abs(x1 - x2) + abs(y1 - y2)
 
 
 def get_shortest_max_list(maze, max_values, previous_cell):
+    """
+    Gets the maxes that are the shortest distance away from the previous searched cell
+    :param maze: Maze where target is
+    :param max_values: array of tupples containing all the cells with the maximum values
+    :param previous_cell: previous searched cell
+    :return: list of tuples of maxes that are shortest distance away from previous searched cell
+    """
     distance_array = []
     for cell2 in max_values:
         distance_array.append((get_manhattan_distance(cell2, previous_cell), cell2))
@@ -43,11 +56,22 @@ def get_shortest_max_list(maze, max_values, previous_cell):
 
 
 def get_current_max_cell(maze, option, prev, previous_cell):
+    """
+    Gets next cell to be searched based of metrics based in project instructions, manhattan distance, then ties broken
+    by randomness
+    :param maze: Maze where the cells are located
+    :param option: Which agent is being used
+    :param prev: boolean to see if there is a previous cell
+    :param previous_cell: previous searched cell
+    :return: the cell to be searched
+    """
     # if option is 1 then agent 1 is being used, if the option is 2 then agent 2 is being used
     if option == 1:
         temp_matrix = maze.belief_matrix
-    else:
+    elif option == 2:
         temp_matrix = maze.confidence_matrix
+    else:
+        temp_matrix = maze.distance_belief_matrix
 
     result = np.where(temp_matrix == np.amax(temp_matrix))
     list_of_maxes = list(zip(result[0], result[1]))
@@ -58,14 +82,31 @@ def get_current_max_cell(maze, option, prev, previous_cell):
 
 
 def false_negative_of_cell(maze, cell):
+    """
+    Gets the false negative rate for a given cell
+    :param maze: Maze where terrain type is stored
+    :param cell: cell where the false negative is needed
+    :return: the false negative rate
+    """
     return maze.board[cell[0], cell[1]].false_negative
 
 
 def get_total_distance_traveled(maze):
+    """
+    Gets the total distance traveled throughout the searching
+    :param maze: Maze with the distances array
+    :return: sum of traveled distances
+    """
     return sum(maze.traveled_distances)
 
 
 def search_cell(maze, cell):
+    """
+    Search a given cell for target
+    :param maze: Maze where search is being conducted
+    :param cell: cell being searched
+    :return: True if the target was found, false if it wasn't
+    """
     random_number = random.uniform(0, 1)
     if maze.board[cell[0], cell[1]].is_target:
         if random_number > maze.board[cell[0], cell[1]].false_negative:
@@ -77,6 +118,12 @@ def search_cell(maze, cell):
 
 
 def fill_distance_matrix(maze, cell):
+    """
+    Makes distance matrix from celli to all other cells filled by manhattan distances
+    :param maze: Maze to get distances from
+    :param cell: starting cell
+    :return:
+    """
     distance_matrix = np.zeros((maze.dim, maze.dim))
     (x1, y1) = cell
     for x2 in range(maze.dim):
@@ -86,26 +133,17 @@ def fill_distance_matrix(maze, cell):
     return distance_matrix
 
 
-def get_agent_3_max_xell(maze, option, previous_cell):
-    distance_matrix = fill_distance_matrix(maze, previous_cell)
-    temp_matrix = maze.confidence_matrix
+def agent(maze, option, starting_cell):
+    """
 
-    result = np.where(temp_matrix == np.amax(temp_matrix))
-    list_of_maxes = list(zip(result[0], result[1]))
-
-    list_of_maxes = get_shortest_max_list(maze, list_of_maxes, previous_cell)
-
-    # make some method to get the average of all the probabilities of the neighbors of each cell in list_of_maxes
-    # make a list of all the same averages
-    # either choose highest average neighbor probability
-    # break those ties by randomness
-
-    return list_of_maxes[random_index]
-
-
-def agent(maze, option):
+    :param maze: The maze where target is
+    :param option: Use agent 1, 2, or 3 (the improved agent)
+    :param starting_cell: The cell to start searching from
+    :return:
+    """
     number_of_searches = 0
-    (x, y) = get_current_max_cell(maze, option, False, (0, 0))
+    (x, y) = starting_cell
+    # (x, y) = get_current_max_cell(maze, option, False, (0, 0))
     maze.traveled_distances.append(0)
     while True:
 
@@ -116,8 +154,8 @@ def agent(maze, option):
         if search_cell(maze, (x, y)):
             total_distance_traveled = get_total_distance_traveled(maze)
             # set the target as found
-            maze.board[x, y].is_found = True
-            environment.show_board(maze)
+            # maze.board[x, y].is_found = True
+            # environment.show_board(maze)
             return number_of_searches + total_distance_traveled
         else:
             # Calculate P(Target in Cell i | Observations ^ Failure in Cell j)
@@ -146,9 +184,17 @@ def agent(maze, option):
                 sum_of_probabilities_confidence = np.sum(maze.confidence_matrix)
                 maze.confidence_matrix = maze.confidence_matrix / sum_of_probabilities_confidence
 
-                if option == 3:
-                    previous_cell = (x, y)
-                    (x, y) = get_agent_3_max_xell(maze, option, previous_cell)
+            # Agent 3 utilizes another metric of distance on top of belief
+            # Agent 3 assumes failure on the next cell, so it searches the closest maxes with the highest
+            # probabilities around it
+            if option == 3:
+                # generate a matrix of manhattan distances from the current cell
+                manhattan_distance_matrix = fill_distance_matrix(maze, (x, y))
+                # normalize matrix using logarithm
+                log_distances = 1 + np.log(1 + manhattan_distance_matrix)
+                # make the distance belief matrix based upon the distance metric
+                maze.distance_belief_matrix = maze.belief_matrix / log_distances
 
+        # get the next cell to search for the iterations
         previous_cell = (x, y)
         (x, y) = get_current_max_cell(maze, option, True, previous_cell)

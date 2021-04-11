@@ -2,31 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from numpy import random
-from collections import namedtuple
-
-Cell = namedtuple('Cell', ['row', 'col'])
 
 
 class cellInfo:
     """Information of for a given element in the maze"""
 
-    def __init__(self, row, col):
+    def __init__(self):
         """
         Initializes with basic values for information
-        :param terrain: the type of terrain that cell is
-        :param is_target: whether or not the cell is a target
-        :param false_negative: the false negative probability if the cell
-                                is a target
         """
         self.terrain = ""
         self.is_target = False
         self.is_found = False
         self.false_negative = 0
-        self.row = row
-        self.col = col
-
-    def __repr__(self):
-        return f'{(self.row, self.col)}'
 
 
 class Maze:
@@ -37,7 +25,7 @@ class Maze:
         self.board = np.empty((dim, dim), dtype=object)
         for x in range(dim):
             for y in range(dim):
-                self.board[x, y] = cellInfo(x, y)
+                self.board[x, y] = cellInfo()
                 random_number = random.uniform(0, 1)
                 if random_number < 0.25:
                     self.board[x, y].terrain = "flat"
@@ -51,16 +39,15 @@ class Maze:
                 else:
                     self.board[x, y].terrain = "caves"
                     self.board[x, y].false_negative = 0.9
-        x = random.randint(0, dim)
-        y = random.randint(0, dim)
-        self.board[x, y].is_target = True
-        self.belief_matrix = np.full((dim, dim), 1/(dim**2))
-        self.confidence_matrix = np.full((dim, dim), 1/(dim**2))
+        self.belief_matrix = np.full((dim, dim), 1 / (dim ** 2))
+        self.distance_belief_matrix = np.full((dim, dim), 1 / (dim ** 2))
+        self.confidence_matrix = np.full((dim, dim), 1 / (dim ** 2))
         self.traveled_distances = []
 
     def reset(self):
-        self.belief_matrix = np.full((self.dim, self.dim), 1/(self.dim**2))
-        self.confidence_matrix = np.full((self.dim, self.dim), 1/(self.dim**2))
+        self.belief_matrix = np.full((self.dim, self.dim), 1 / (self.dim ** 2))
+        self.distance_belief_matrix = np.full((self.dim, self.dim), 1 / (self.dim ** 2))
+        self.confidence_matrix = np.full((self.dim, self.dim), 1 / (self.dim ** 2))
         self.traveled_distances = []
 
 
