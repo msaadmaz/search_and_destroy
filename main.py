@@ -1,9 +1,4 @@
-import random
-
-import agent
-import environment
 import get_averages
-from environment import Maze
 
 if __name__ == '__main__':
     get_averages.generate_strategy_bar_plot_all_agents(50)

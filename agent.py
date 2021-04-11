@@ -1,8 +1,6 @@
 import numpy as np
 from numpy import random
 
-import environment
-
 
 def get_manhattan_distance(cell1, cell2):
     """
