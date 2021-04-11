@@ -18,7 +18,7 @@ def get_shortest_max_list(maze, max_values, previous_cell):
     """
     Gets the maxes that are the shortest distance away from the previous searched cell
     :param maze: Maze where target is
-    :param max_values: array of tupples containing all the cells with the maximum values
+    :param max_values: array of tuples containing all the cells with the maximum values
     :param previous_cell: previous searched cell
     :return: list of tuples of maxes that are shortest distance away from previous searched cell
     """
@@ -117,10 +117,10 @@ def search_cell(maze, cell):
 
 def fill_distance_matrix(maze, cell):
     """
-    Makes distance matrix from celli to all other cells filled by manhattan distances
+    Makes distance matrix from cell i to all other cells filled by manhattan distances
     :param maze: Maze to get distances from
     :param cell: starting cell
-    :return:
+    :return: Manhattan distance matrix
     """
     distance_matrix = np.zeros((maze.dim, maze.dim))
     (x1, y1) = cell
@@ -137,7 +137,7 @@ def agent(maze, option, starting_cell):
     :param maze: The maze where target is
     :param option: Use agent 1, 2, or 3 (the improved agent)
     :param starting_cell: The cell to start searching from
-    :return:
+    :return: final score
     """
     number_of_searches = 0
     (x, y) = starting_cell
@@ -157,7 +157,7 @@ def agent(maze, option, starting_cell):
             return number_of_searches + total_distance_traveled
         else:
             # Calculate P(Target in Cell i | Observations ^ Failure in Cell j)
-            # Use Baye's Theorem and update the Network
+            # Use Bayes' Theorem and update the Network
 
             # P(Target in current Cell) * P(Failure in  current Cell | Target in current Cell ) --> also the False
             # negative
@@ -166,7 +166,7 @@ def agent(maze, option, starting_cell):
             # Calculate P(failure in current Cell)
             sum_of_probabilities = np.sum(maze.belief_matrix)
 
-            # Update the Baysien Network with new Probabilities
+            # Update the Bayesian Network with new Probabilities
             maze.belief_matrix = maze.belief_matrix / sum_of_probabilities
 
             # update the confidence matrix for agent 2
