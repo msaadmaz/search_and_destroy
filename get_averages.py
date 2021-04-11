@@ -82,3 +82,51 @@ def bar_plot_agent_3(dim):
     ax.set_xticklabels(plots_x_axis_values)
     ax.legend()
     plt.savefig("Advanced_graph.png")
+
+
+def generate_strategy_bar_plot_all_agents(dim):
+    plots = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    agent_1_averages = []
+    agent_2_averages = []
+    agent_3_averages = []
+
+    for plot in plots:
+        maze = Maze(dim)
+        trials = 10
+        agent_1_score_counter = 0
+        agent_2_score_counter = 0
+        agent_3_score_counter = 0
+        for i in range(0, trials):
+            target_location = (random.randrange(maze.dim), random.randrange(maze.dim))
+            start_value = random.randrange(maze.dim), random.randrange(maze.dim)
+            maze.board[target_location].is_target = True
+            print("plot = ", plot, "trial = ", i + 1)
+            agent_1_score_counter += agent.agent(maze, 1, start_value)
+            maze.reset()
+            agent_2_score_counter += agent.agent(maze, 2, start_value)
+            maze.reset()
+            agent_3_score_counter += agent.agent(maze, 3, start_value)
+            maze.reset()
+            maze.board[target_location].is_target = False
+        agent_1_averages.append(agent_1_score_counter / trials)
+        agent_2_averages.append(agent_2_score_counter / trials)
+        agent_3_averages.append(agent_3_score_counter / trials)
+
+    print("Strategy 1: ", agent_1_averages)
+    print("Strategy 2: ", agent_2_averages)
+    print("Strategy 3: ", agent_3_averages)
+
+    x = np.arange(len(plots))
+    width = .35
+    fig, ax = plt.subplots()
+    ax.bar(x - width, agent_1_averages, width, label='Strategy 1')
+    ax.bar(x, agent_2_averages, width, label='Strategy 2')
+    ax.bar(x + width, agent_3_averages, width, label='Strategy 3')
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('Average Performance')
+    ax.set_title('Agent 1, 2, and 3 Performances')
+    ax.set_xticks(x)
+    ax.set_xticklabels(plots)
+    ax.legend()
+    plt.savefig("strategy1_2_3.png")
