@@ -174,7 +174,7 @@ def agent(maze, option, starting_cell):
             # update the confidence matrix for agent 2
             # the probabilities in the Confidence matrix represents cells which the algorithm believes to have the
             # highest probability of finding the target
-            if option >= 2:
+            if option == 2:
                 for i in range(maze.dim):
                     for j in range(maze.dim):
                         maze.confidence_matrix[x, y] = maze.belief_matrix[x, y] * (
@@ -184,16 +184,16 @@ def agent(maze, option, starting_cell):
                 sum_of_probabilities_confidence = np.sum(maze.confidence_matrix)
                 maze.confidence_matrix = maze.confidence_matrix / sum_of_probabilities_confidence
 
-                # Agent 3 utilizes another metric of distance on top of belief
-                # Agent 3 assumes failure on the next cell, so it searches the closest maxes with the highest
-                # probabilities around it
-                if option == 3:
-                    # generate a matrix of manhattan distances from the current cell
-                    manhattan_distance_matrix = fill_distance_matrix(maze, (x, y))
-                    # normalize matrix using logarithm
-                    log_distances = 1 + np.log(1 + manhattan_distance_matrix)
-                    # make the distance belief matrix based upon the distance metric
-                    maze.distance_belief_matrix = maze.confidence_matrix / log_distances
+            # Agent 3 utilizes another metric of distance on top of belief
+            # Agent 3 assumes failure on the next cell, so it searches the closest maxes with the highest
+            # probabilities around it
+            if option == 3:
+                # generate a matrix of manhattan distances from the current cell
+                manhattan_distance_matrix = fill_distance_matrix(maze, (x, y))
+                # normalize matrix using logarithm
+                log_distances = 1 + np.log(1 + manhattan_distance_matrix)
+                # make the distance belief matrix based upon the distance metric
+                maze.distance_belief_matrix = maze.belief_matrix / log_distances
 
         # get the next cell to search for the iterations
         previous_cell = (x, y)
